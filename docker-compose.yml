@@ -1,0 +1,56 @@
+version: "3"
+
+services:
+
+  mysql:
+    image: mysql/mysql-server:5.7
+    platform: linux/amd64 # required for ARM CPUs
+    restart: always
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=1
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWD}
+      - MYSQL_DATABASE=${DB_NAME}
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    platform: linux/amd64 # required for ARM CPUs
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWD}
+    ports:
+      - "8199:80"
+
+  redis:
+    platform: linux/amd64 # required for ARM CPUs
+    image: redis:alpine
+    
+  prestashop:
+    platform: linux/amd64 # required for ARM CPUs
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PS_VERSION=${PS_VERSION}
+    depends_on:
+      - mysql
+    ports:
+      - 8385:80
+    volumes:
+      - ./themes:/var/www/html/themes
+      - ./modules:/var/www/html/modules
+    environment:
+      - DB_SERVER=mysql
+      - DB_PREFIX=ps_
+      - PS_DEV_MODE=${PS_DEV_MODE}
+      - PS_INSTALL_AUTO=1
+      - DB_USER=${DB_USER}
+      - DB_PASSWD=${DB_PASSWD}
+      - DB_NAME=${DB_NAME}
+      - PS_FOLDER_ADMIN=${PS_FOLDER_ADMIN}
+      - PS_DOMAIN=${PS_DOMAIN}:8385
+      - PS_LANGUAGE=${PS_LANGUAGE}
+      - PS_COUNTRY=${PS_COUNTRY}
+      - PS_FOLDER_INSTALL=installed
