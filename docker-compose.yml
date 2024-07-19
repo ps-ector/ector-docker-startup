@@ -40,7 +40,6 @@ services:
       - 8385:80
     volumes:
       - ./themes:/var/www/html/themes
-      - ./modules:/var/www/html/modules
     environment:
       - DB_SERVER=mysql
       - DB_PREFIX=ps_
